@@ -1,0 +1,73 @@
+<project name="monk" default="run" 
+	xmlns:if="ant:if" 
+	xmlns:unless="ant:unless"
+>
+	<!-- Check how to use variables in this file so replace lib path like ${lib} -->
+	<path id="3rd-party-classpath">
+    <fileset dir="com/eklari/monk/lib">
+      <include name="**/*.jar" />
+    </fileset>
+	</path>
+
+	<!-- <target name="build_helper">
+  	<javac srcdir="Helperlib/" includeantruntime="false" />
+  </target> -->
+
+  <target name="tool_ast_helper">
+  	<javac srcdir="com/eklari/monk/tool/" destdir="com/eklari/monk/build" includeantruntime="false" />
+  </target>
+
+	<target name="generate_ast" depends="tool_ast_helper">
+		<java classname="com.eklari.monk.tool.GenerateAst">
+			<arg value="com/eklari/monk" />
+			<classpath>
+      	<pathelement location="com/eklari/monk/build" />
+    	</classpath>
+		</java>
+	</target>
+
+	<target name="compile_ast_printer">
+		<javac destdir="com/eklari/monk/build" includeantruntime="false">
+			<src path="com/eklari/monk/" />
+			<include name="AstPrinter.java" />
+			<classpath refid="3rd-party-classpath" />
+		</javac>
+	</target>
+
+	<target name="ast_printer" depends="compile_ast_printer">
+		<java classname="com.eklari.monk.AstPrinter">
+			<classpath>
+      	<pathelement location="com/eklari/monk/build" />
+    	</classpath>
+		</java>
+	</target>
+
+  <!-- <target name="compile" depends="build_helper"> -->
+  <target name="compile" depends="generate_ast">
+  	<javac srcdir="com/eklari/monk/" destdir="com/eklari/monk/build" includeantruntime="false">
+  		<exclude name="AstPrinter.java" />
+  		<classpath refid="3rd-party-classpath" />
+  	</javac>
+  </target>
+  
+	<target name="build" depends="compile">
+		<java classname="com.eklari.monk.Monk">
+			<arg line="${file}" />
+			<!-- <arg value="${arg2}" /> -->
+			<classpath>
+      	<pathelement location="com/eklari/monk/build" />
+      	<path refid="3rd-party-classpath" />
+    	</classpath>
+		</java>
+	</target>
+
+	<target name="run">
+		<java classname="com.eklari.monk.Monk">
+			<arg value="${file}" if:set="file" />
+			<classpath>
+      	<pathelement location="com/eklari/monk/build" />
+      	<path refid="3rd-party-classpath" />
+    	</classpath>
+		</java>
+	</target>
+</project>
